@@ -1,4 +1,6 @@
-{ mkDerivation, base, optparse-applicative, stdenv, text, turtle }:
+{ mkDerivation, base, optparse-applicative, stdenv, text, time
+, turtle
+}:
 mkDerivation {
   pname = "dhess-ssh-keygen";
   version = "0.1.0.0";
@@ -6,7 +8,7 @@ mkDerivation {
   isLibrary = false;
   isExecutable = true;
   executableHaskellDepends = [
-    base optparse-applicative text turtle
+    base optparse-applicative text time turtle
   ];
   homepage = "https://github.com/dhess/dhess-ssh-keygen";
   description = "A simple script to enforce good ssh-keygen hygiene";

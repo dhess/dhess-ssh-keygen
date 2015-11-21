@@ -17,10 +17,11 @@ Extra-Source-Files:     README.md
 
 Executable dhess-ssh-keygen
   Main-Is:             Main.hs
-  Other-Modules:       Ed25519
+  Other-Modules:       KeyGen
   Other-Extensions:    OverloadedStrings
   Build-Depends:       base >=4.8 && <4.9
                      , optparse-applicative
+                     , time
                      , turtle
                      , text
   Hs-Source-Dirs:      src
