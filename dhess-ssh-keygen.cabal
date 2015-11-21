@@ -1,0 +1,30 @@
+Name:                   dhess-ssh-keygen
+Version:                0.1.0.0
+Cabal-Version:          >= 1.10
+Build-Type:             Simple
+Author:                 Drew Hess <src@drewhess.com>
+Maintainer:             Drew Hess <src@drewhess.com>
+Homepage:               https://github.com/dhess/dhess-ssh-keygen
+Bug-Reports:            https://github.com/dhess/dhess-ssh-keygen/issues/
+Stability:              experimental
+License:                BSD3
+License-File:           LICENSE
+Copyright:              Copyright (c) 2015, Drew Hess
+Tested-With:            GHC == 7.10.2
+Synopsis:               A simple script to enforce good ssh-keygen hygiene
+
+Extra-Source-Files:     README.md
+
+Executable dhess-ssh-keygen
+  Main-Is:             Main.hs
+  Other-Extensions:    OverloadedStrings
+  Build-Depends:       base >=4.8 && <4.9
+                     , optparse-applicative
+                     , shelly
+                     , text
+  Hs-Source-Dirs:      src
+  Default-Language:    Haskell2010                                
+
+Source-Repository head
+  Type:                 git
+  Location:             git://github.com/dhess/dhess-ssh-keygen.git
