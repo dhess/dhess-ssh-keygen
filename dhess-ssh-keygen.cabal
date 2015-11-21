@@ -17,6 +17,7 @@ Extra-Source-Files:     README.md
 
 Executable dhess-ssh-keygen
   Main-Is:             Main.hs
+  Other-Modules:       Ed25519
   Other-Extensions:    OverloadedStrings
   Build-Depends:       base >=4.8 && <4.9
                      , optparse-applicative
