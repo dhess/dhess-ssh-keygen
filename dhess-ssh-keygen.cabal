@@ -20,7 +20,7 @@ Executable dhess-ssh-keygen
   Other-Extensions:    OverloadedStrings
   Build-Depends:       base >=4.8 && <4.9
                      , optparse-applicative
-                     , shelly
+                     , turtle
                      , text
   Hs-Source-Dirs:      src
   Default-Language:    Haskell2010                                

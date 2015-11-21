@@ -4,8 +4,8 @@ let
 
   inherit (nixpkgs) pkgs;
 
-  f = { mkDerivation, base, optparse-applicative, shelly, stdenv
-      , text
+  f = { mkDerivation, base, optparse-applicative, stdenv, text
+      , turtle
       }:
       mkDerivation {
         pname = "dhess-ssh-keygen";
@@ -14,7 +14,7 @@ let
         isLibrary = false;
         isExecutable = true;
         executableHaskellDepends = [
-          base optparse-applicative shelly text
+          base optparse-applicative text turtle
         ];
         homepage = "https://github.com/dhess/dhess-ssh-keygen";
         description = "A simple script to enforce good ssh-keygen hygiene";

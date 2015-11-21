@@ -1,14 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ExtendedDefaultRules #-}
-{-# OPTIONS_GHC -fno-warn-type-defaults #-}
+
 
 import Data.Text (Text)
 import qualified Data.Text as T
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as Options (command)
-import Shelly
-
-default (Text)
+import Turtle
+import Prelude hiding (FilePath)
 
 data Verbosity = Normal | Verbose
 
@@ -49,7 +47,7 @@ newtype UserId = UserId { userId :: Text }
 newtype Comment = Comment { comment :: Text }
 
 genEd25519 :: UserId -> Comment -> IO ()
-genEd25519 u c = shelly $
+genEd25519 u c = sh $
   do echo $ userId u
      echo $ comment c
 
