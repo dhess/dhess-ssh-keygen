@@ -20,7 +20,10 @@ Executable dhess-ssh-keygen
   Other-Modules:       KeyGen
   Other-Extensions:    OverloadedStrings
   Build-Depends:       base >=4.8 && <4.9
+                     , directory
+                     , foldl
                      , optparse-applicative
+                     , system-filepath
                      , time
                      , turtle
                      , text
