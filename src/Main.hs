@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import qualified Data.Text as T
+import KeyGen (Comment(..), KeyType(..), Options(..), UserId(..),  generateEd25519, optionsParser)
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as Options (command)
-import KeyGen (Comment(..), KeyType(..), Options(..), UserId(..),  generateEd25519, optionsParser)
+import Turtle (stdout)
 
 data Verbosity = Normal | Verbose
 
@@ -31,7 +32,7 @@ keyGen =
 
 runCmd :: Command -> IO ()
 runCmd (Ed25519Cmd options userid comment) =
-  generateEd25519 options (UserId $ T.pack userid) (Comment $ T.pack comment)
+  stdout $ generateEd25519 options (UserId $ T.pack userid) (Comment $ T.pack comment)
 
 main :: IO ()
 main = execParser opts >>= runCmd

@@ -79,11 +79,11 @@ fileNameToText path =
     Left t -> t <> " (note: invalid encoding)"
     Right t -> t
 
-generateEd25519 :: Options -> UserId -> Comment -> IO ()
+generateEd25519 :: Options -> UserId -> Comment -> Shell Text
 generateEd25519 = generate Ed25519
 
-generate :: KeyType -> Options -> UserId -> Comment -> IO ()
-generate k o u c = stdout $
+generate :: KeyType -> Options -> UserId -> Comment -> Shell Text
+generate k o u c =
   do yyyymmdd <- today
      sshDir <- sshdir
      let kfn = keyFileName u yyyymmdd k
