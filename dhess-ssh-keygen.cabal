@@ -20,12 +20,15 @@ Executable dhess-ssh-keygen
   Other-Modules:       KeyGen
   Other-Extensions:    OverloadedStrings
   Build-Depends:       base >=4.8 && <4.9
+                     , base64-bytestring
+                     , bytestring
                      , directory
+                     , entropy
                      , optparse-applicative
-                     , time
                      , shelly
                      , system-filepath
                      , text
+                     , time
   Hs-Source-Dirs:      src
   Default-Language:    Haskell2010                                
 

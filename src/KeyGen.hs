@@ -13,16 +13,21 @@ module KeyGen
        , optionsParser
        ) where
 
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as B (length)
+import qualified Data.ByteString.Base64 as B64 (encode)
 import Data.Text (Text)
 import qualified Data.Text as T
+import Data.Text.Encoding (decodeUtf8)
 import Data.Time
 import Data.Time.Clock (getCurrentTime)
+import Filesystem.Path.CurrentOS (decodeString)
 import Options.Applicative
 import Prelude hiding (FilePath)
 import qualified Prelude as Prelude (FilePath)
 import Shelly
 import System.Directory (getAppUserDataDirectory)
-import Filesystem.Path.CurrentOS (decodeString)
+import System.Entropy (getEntropy)
 
 default (T.Text)
 
@@ -65,14 +70,23 @@ keyFileName u ts kt = fromText (userId u <> "_id_" <> tshow kt <> "_" <> timeSta
 pubKeyFileName :: FilePath -> FilePath
 pubKeyFileName priv = priv <.> "pub"
 
-generateEd25519 :: Options -> UserId -> Comment -> Sh ()
-generateEd25519 = generate Ed25519
-
 fpToFp :: Prelude.FilePath -> FilePath
 fpToFp = decodeString
 
 sshDirectory :: Sh FilePath
 sshDirectory = liftIO (getAppUserDataDirectory "ssh") >>= return . fpToFp
+
+generatePassphrase :: Int -> Sh Text
+generatePassphrase entropyBytes =
+  do randomBytes <- liftIO $ getEntropy entropyBytes
+     -- Sanity check
+     when (B.length randomBytes /= entropyBytes) $
+       errorExit $ "generatePassphrase: getEntropy returned fewer bytes than expected!"
+
+     return $ decodeUtf8 (B64.encode randomBytes)
+
+generateEd25519 :: Options -> UserId -> Comment -> Sh ()
+generateEd25519 = generate Ed25519
 
 generate :: KeyType -> Options -> UserId -> Comment -> Sh ()
 generate k o u c =
@@ -91,6 +105,8 @@ generate k o u c =
        errorExit ("An SSH key named "
                  <> toTextIgnore kfn
                  <> " already exists, refusing to overwrite it.")
+
+     passphrase <- generatePassphrase 32 -- 32*4 == 128 bits of entropy
 
      withTmpDir $ \tmpDir ->
        let tmpKeyFile = tmpDir </> kfn

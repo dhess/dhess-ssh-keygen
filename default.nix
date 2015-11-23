@@ -1,5 +1,6 @@
-{ mkDerivation, base, directory, optparse-applicative, shelly
-, stdenv, system-filepath, text, time
+{ mkDerivation, base, base64-bytestring, bytestring, directory
+, entropy, optparse-applicative, shelly, stdenv, system-filepath
+, text, time
 }:
 mkDerivation {
   pname = "dhess-ssh-keygen";
@@ -8,8 +9,8 @@ mkDerivation {
   isLibrary = false;
   isExecutable = true;
   executableHaskellDepends = [
-    base directory optparse-applicative shelly system-filepath text
-    time
+    base base64-bytestring bytestring directory entropy
+    optparse-applicative shelly system-filepath text time
   ];
   homepage = "https://github.com/dhess/dhess-ssh-keygen";
   description = "A simple script to enforce good ssh-keygen hygiene";
