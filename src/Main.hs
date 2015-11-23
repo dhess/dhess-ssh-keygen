@@ -4,7 +4,7 @@ import qualified Data.Text as T
 import KeyGen (Comment(..), KeyType(..), Options(..), UserId(..),  generateEd25519, optionsParser)
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as Options (command)
-import Turtle (stdout)
+import Shelly (shelly)
 
 data Verbosity = Normal | Verbose
 
@@ -32,7 +32,7 @@ keyGen =
 
 runCmd :: Command -> IO ()
 runCmd (Ed25519Cmd options userid comment) =
-  stdout $ generateEd25519 options (UserId $ T.pack userid) (Comment $ T.pack comment)
+  shelly $ generateEd25519 options (UserId $ T.pack userid) (Comment $ T.pack comment)
 
 main :: IO ()
 main = execParser opts >>= runCmd

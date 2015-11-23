@@ -21,11 +21,10 @@ Executable dhess-ssh-keygen
   Other-Extensions:    OverloadedStrings
   Build-Depends:       base >=4.8 && <4.9
                      , directory
-                     , foldl
                      , optparse-applicative
-                     , system-filepath
                      , time
-                     , turtle
+                     , shelly
+                     , system-filepath
                      , text
   Hs-Source-Dirs:      src
   Default-Language:    Haskell2010                                
