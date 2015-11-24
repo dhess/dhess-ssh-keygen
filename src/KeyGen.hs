@@ -21,13 +21,14 @@ import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8)
 import Data.Time
 import Data.Time.Clock (getCurrentTime)
-import Filesystem.Path.CurrentOS (decodeString)
+import Filesystem.Path.CurrentOS (decodeString, encodeString)
 import Options.Applicative
 import Prelude hiding (FilePath)
 import qualified Prelude as Prelude (FilePath)
 import Shelly
 import System.Directory (getAppUserDataDirectory)
 import System.Entropy (getEntropy)
+import System.Posix.Files (ownerModes, setFileMode)
 
 default (T.Text)
 
@@ -108,13 +109,59 @@ generate k o u c =
 
      passphrase <- generatePassphrase 32 -- 32*4 == 128 bits of entropy
 
+     -- ssh-keygen reads the passphrase directly from /dev/tty and
+     -- ignores stdin. Therefore, we write an expect script to the
+     -- temporary directory which reads the passphrase from stdin, and
+     -- then sends it to ssh-keygen.
      withTmpDir $ \tmpDir ->
        let tmpKeyFile = tmpDir </> kfn
            tmpPubKeyFile = pubKeyFileName tmpKeyFile
+           script = tmpDir </> "expect-script"
        in
-         do cmd "ssh-keygen" "-t" (tshow k) "-f" tmpKeyFile "-C" (comment $ commentWithTimeStamp c yyyymmdd)
+         do writefile script expectProgram
+            makeExecutable script
+            -- Add a newline for expect_user to match in the script
+            setStdin $ passphrase <> "\n"
+            cmd script (tshow k) tmpKeyFile (comment $ commentWithTimeStamp c yyyymmdd)
             mv tmpKeyFile keyFile
             mv tmpPubKeyFile pubKeyFile
 
      echo ""
      echo $ "Created new SSH key " <> toTextIgnore keyFile
+     echo $ "Passphrase is " <> passphrase
+
+makeExecutable :: FilePath -> Sh ()
+makeExecutable fn = liftIO $ setFileMode (encodeString fn) ownerModes
+
+expectProgram :: Text
+expectProgram =
+  "#!/usr/bin/expect\n\
+   \\n\
+   \if { $argc != 3 } {\n\
+   \    puts \"usage: $argv0 key_type key_filename comment\\r\\r\"\n\
+   \    puts \"Note: silently waits for passphrase when run.\\r\"\n\
+   \    exit 1\n\
+   \}\n\
+   \\n\
+   \set key_type [lindex $argv 0]\n\
+   \set key_filename [lindex $argv 1]\n\
+   \set comment [lindex $argv 2]\n\
+   \\n\
+   \stty -echo\n\
+   \expect_user -re \"(.*)\\n\"\n\
+   \set passphrase \"$expect_out(1,string)\\r\"\n\
+   \stty echo\n\
+   \\n\
+   \set timeout 10\n\
+   \spawn ssh-keygen -t \"$key_type\" -f \"$key_filename\" -C \"$comment\"\n\
+   \expect {\n\
+   \    timeout { send_user \"\\nTimed out waiting for passphrase prompt.\\n\"; exit 1 }\n\
+   \    \"Enter passphrase (empty for no passphrase): \"\n\
+   \}  \n\
+   \send $passphrase\n\
+   \expect {\n\
+   \    timeout { send_user \"\\nTimed out waiting for passphrase confirmation.\\n\"; exit 1 }\n\
+   \    \"Enter same passphrase again: \"\n\
+   \}\n\
+   \send $passphrase\n\
+   \expect\n"

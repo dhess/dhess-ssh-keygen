@@ -29,6 +29,7 @@ Executable dhess-ssh-keygen
                      , system-filepath
                      , text
                      , time
+                     , unix
   Hs-Source-Dirs:      src
   Default-Language:    Haskell2010                                
 
