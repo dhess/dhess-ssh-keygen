@@ -11,7 +11,7 @@ License:                BSD3
 License-File:           LICENSE
 Copyright:              Copyright (c) 2015, Drew Hess
 Tested-With:            GHC == 7.10.2
-Synopsis:               A simple script to enforce good ssh-keygen hygiene
+Synopsis:               Enforce good ssh-keygen hygiene
 
 Extra-Source-Files:     README.md
 
