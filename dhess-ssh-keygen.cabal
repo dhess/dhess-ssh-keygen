@@ -1,5 +1,5 @@
 Name:                   dhess-ssh-keygen
-Version:                0.1.0.0
+Version:                1.0.0
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
