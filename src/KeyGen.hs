@@ -21,14 +21,15 @@ import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8)
 import Data.Time
 import Data.Time.Clock (getCurrentTime)
-import Filesystem.Path.CurrentOS (decodeString, encodeString)
+import qualified Filesystem.Path.CurrentOS as FP (decodeString, encodeString)
 import Options.Applicative
 import Prelude hiding (FilePath)
 import qualified Prelude as Prelude (FilePath)
 import Shelly
 import System.Directory (getAppUserDataDirectory)
 import System.Entropy (getEntropy)
-import System.Posix.Files (ownerModes, setFileMode)
+import System.Posix.Files (ownerModes, ownerReadMode, ownerWriteMode, setFileMode, unionFileModes)
+import System.Posix.Types (FileMode)
 
 default (T.Text)
 
@@ -71,11 +72,14 @@ keyFileName u ts kt = fromText (userId u <> "_id_" <> tshow kt <> "_" <> timeSta
 pubKeyFileName :: FilePath -> FilePath
 pubKeyFileName priv = priv <.> "pub"
 
-fpToFp :: Prelude.FilePath -> FilePath
-fpToFp = decodeString
+gpgFileName :: FilePath -> FilePath
+gpgFileName priv = priv <.> "gpg"
 
 sshDirectory :: Sh FilePath
-sshDirectory = liftIO (getAppUserDataDirectory "ssh") >>= return . fpToFp
+sshDirectory = liftIO (getAppUserDataDirectory "ssh") >>= return . FP.decodeString
+
+ownerRW :: FileMode
+ownerRW = unionFileModes ownerReadMode ownerWriteMode
 
 generatePassphrase :: Int -> Sh Text
 generatePassphrase entropyBytes =
@@ -96,6 +100,7 @@ generate k o u c =
      let kfn = keyFileName u yyyymmdd k
          keyFile = sshDir </> kfn
          pubKeyFile = pubKeyFileName keyFile
+         gpgFile = gpgFileName keyFile
 
      -- To handle the "clobber" case, we create the new key in a
      -- temporary directory, then move it to the user's .ssh directory
@@ -116,6 +121,7 @@ generate k o u c =
      withTmpDir $ \tmpDir ->
        let tmpKeyFile = tmpDir </> kfn
            tmpPubKeyFile = pubKeyFileName tmpKeyFile
+           tmpGpgFile = gpgFileName tmpKeyFile
            script = tmpDir </> "expect-script"
        in
          do writefile script expectProgram
@@ -123,15 +129,22 @@ generate k o u c =
             -- Add a newline for expect_user to match in the script
             setStdin $ passphrase <> "\n"
             cmd script (tshow k) tmpKeyFile (comment $ commentWithTimeStamp c yyyymmdd)
+
+            -- Now encrypt the passphrase and set secure permissions on the file.
+            setStdin $ passphrase
+            cmd "gpg" "--encrypt" "--default-recipient-self" "--output" tmpGpgFile
+            liftIO $ setFileMode (FP.encodeString tmpGpgFile) ownerRW
+
             mv tmpKeyFile keyFile
             mv tmpPubKeyFile pubKeyFile
+            mv tmpGpgFile gpgFile
 
      echo ""
      echo $ "Created new SSH key " <> toTextIgnore keyFile
-     echo $ "Passphrase is " <> passphrase
+     echo $ "Passphrase is encrypted in " <> toTextIgnore gpgFile
 
 makeExecutable :: FilePath -> Sh ()
-makeExecutable fn = liftIO $ setFileMode (encodeString fn) ownerModes
+makeExecutable fn = liftIO $ setFileMode (FP.encodeString fn) ownerModes
 
 expectProgram :: Text
 expectProgram =
