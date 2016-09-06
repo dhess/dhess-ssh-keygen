@@ -13,7 +13,7 @@ module KeyGen
        , optionsParser
        ) where
 
-import Data.ByteString (ByteString)
+import Control.Monad (void)
 import qualified Data.ByteString as B (length)
 import qualified Data.ByteString.Base64 as B64 (encode)
 import Data.Text (Text)
@@ -24,7 +24,6 @@ import Data.Time.Clock (getCurrentTime)
 import qualified Filesystem.Path.CurrentOS as FP (decodeString, encodeString)
 import Options.Applicative
 import Prelude hiding (FilePath)
-import qualified Prelude as Prelude (FilePath)
 import Shelly
 import System.Directory (getAppUserDataDirectory)
 import System.Entropy (getEntropy)
@@ -86,15 +85,15 @@ generatePassphrase entropyBytes =
   do randomBytes <- liftIO $ getEntropy entropyBytes
      -- Sanity check
      when (B.length randomBytes /= entropyBytes) $
-       errorExit $ "generatePassphrase: getEntropy returned fewer bytes than expected!"
+       errorExit "generatePassphrase: getEntropy returned fewer bytes than expected!"
 
      return $ decodeUtf8 (B64.encode randomBytes)
 
-generateEd25519 :: Options -> UserId -> Comment -> Sh ()
+generateEd25519 :: FilePath -> Options -> UserId -> Comment -> Sh ()
 generateEd25519 = generate Ed25519
 
-generate :: KeyType -> Options -> UserId -> Comment -> Sh ()
-generate k o u c =
+generate :: KeyType -> FilePath -> Options -> UserId -> Comment -> Sh ()
+generate k gpg o u c =
   do yyyymmdd <- today
      sshDir <- sshDirectory
      let kfn = keyFileName u yyyymmdd k
@@ -128,11 +127,11 @@ generate k o u c =
             makeExecutable script
             -- Add a newline for expect_user to match in the script
             setStdin $ passphrase <> "\n"
-            cmd script (tshow k) tmpKeyFile (comment $ commentWithTimeStamp c yyyymmdd)
+            void $ cmd script (tshow k) tmpKeyFile (comment $ commentWithTimeStamp c yyyymmdd)
 
             -- Now encrypt the passphrase and set secure permissions on the file.
-            setStdin $ passphrase
-            cmd "gpg" "--encrypt" "--default-recipient-self" "--output" tmpGpgFile
+            setStdin passphrase
+            void $ cmd gpg "--encrypt" "--default-recipient-self" "--output" tmpGpgFile
             liftIO $ setFileMode (FP.encodeString tmpGpgFile) ownerRW
 
             mv tmpKeyFile keyFile
