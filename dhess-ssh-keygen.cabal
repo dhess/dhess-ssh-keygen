@@ -1,5 +1,5 @@
 Name:                   dhess-ssh-keygen
-Version:                1.0.0
+Version:                1.0.1
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
@@ -10,7 +10,7 @@ Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
 Copyright:              Copyright (c) 2015, Drew Hess
-Tested-With:            GHC == 7.10.2
+Tested-With:            GHC == 7.10.2, GHC == 8.0.1
 Synopsis:               Enforce good ssh-keygen hygiene
 
 Extra-Source-Files:     README.md
@@ -19,7 +19,7 @@ Executable dhess-ssh-keygen
   Main-Is:             Main.hs
   Other-Modules:       KeyGen
   Other-Extensions:    OverloadedStrings
-  Build-Depends:       base >=4.8 && <4.9
+  Build-Depends:       base >=4.8 && < 4.10
                      , base64-bytestring
                      , bytestring
                      , directory

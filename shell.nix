@@ -10,7 +10,7 @@ let
       }:
       mkDerivation {
         pname = "dhess-ssh-keygen";
-        version = "1.0.0";
+        version = "1.0.1";
         src = ./.;
         isLibrary = false;
         isExecutable = true;
