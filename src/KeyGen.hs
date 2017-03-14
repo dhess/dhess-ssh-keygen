@@ -16,6 +16,7 @@ module KeyGen
 import Control.Monad (void)
 import qualified Data.ByteString as B (length)
 import qualified Data.ByteString.Base64 as B64 (encode)
+import Data.Monoid ((<>))
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8)

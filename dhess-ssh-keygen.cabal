@@ -10,7 +10,7 @@ Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
 Copyright:              Copyright (c) 2015, Drew Hess
-Tested-With:            GHC == 7.10.2, GHC == 8.0.1
+Tested-With:            GHC == 8.0.2
 Synopsis:               Enforce good ssh-keygen hygiene
 
 Extra-Source-Files:     README.md
